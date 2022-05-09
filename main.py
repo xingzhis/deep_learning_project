@@ -20,9 +20,10 @@ print(device)
 Initialize Hyperparameters
 """
 batch_size = 16
-learning_rate = 1e-4
-num_epochs = 10
-alpha = 0.1 # noise level
+# learning_rate = 1e-4
+learning_rate = 5e-6
+num_epochs = 20
+alpha = 0.01 # noise level
 
 def init_weights(m):
     if isinstance(m, nn.Linear):
@@ -93,12 +94,13 @@ for epoch in range(num_epochs):
         # print(idx)
         imgs, labels = data
         # add noise
-        imgs = imgs + alpha * torch.randn(imgs.size())
+        imgs_wn = imgs + alpha * torch.randn(imgs.size())
         # print(labels.size())
         imgs = imgs.to(device)
+        imgs_wn = imgs_wn.to(device)
 
         # Feeding a batch of images into the network to obtain the output image, mu, and logVar
-        out, mu, logVar = model(imgs)
+        out, mu, logVar = model(imgs_wn)
 
         # The loss is the BCE loss combined with the KL divergence to ensure the distribution is learnt
         kl_divergence = 0.5 * torch.mean(-1 - logVar + mu.pow(2) + logVar.exp())

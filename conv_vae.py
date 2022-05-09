@@ -36,6 +36,10 @@ class ConVAE(nn.Module):
         self.pool = nn.MaxPool2d(2)
         self.upsampling = nn.Upsample(scale_factor=2)
 
+        # self.bn1 = nn.BatchNorm2d(self.n1)
+        # self.bn2 = nn.BatchNorm2d(self.n2)
+        # self.bn3 = nn.BatchNorm2d(self.n3)
+
     def encoder(self, x):
 
         # Input is fed into 2 convolutional layers sequentially
@@ -43,12 +47,15 @@ class ConVAE(nn.Module):
         # Mu and logVar are used for generating middle representation z and KL divergence loss
         # print(x.size())
         x = F.leaky_relu(self.encConv1(x))
+        # x = self.bn1(x)
         x = self.pool(x)
         # print(x.size())
         x = F.leaky_relu(self.encConv2(x))
+        # x = self.bn2(x)
         x = self.pool(x)
         # print(x.size())
         x = F.leaky_relu(self.encConv3(x))
+        # x = self.bn3(x)
         x = self.pool(x)
         # print(x.size())
         x = x.view(x.size()[0], -1)
@@ -70,13 +77,16 @@ class ConVAE(nn.Module):
         x = F.relu(self.decFC1(z))
         # print(x.size())
         x = x.view(-1, self.n3, 16, 16)
+        # x = self.bn3(x)
         # print(x.size())
         x = self.upsampling(x)
         # print(x.size())
         x = F.leaky_relu(self.decConv3(x))
+        # x = self.bn2(x)
         x = self.upsampling(x)
         # print(x.size())
         x = torch.sigmoid(self.decConv2(x))
+        # x = self.bn1(x)
         x = self.upsampling(x)
         # print(x.size())
         x = torch.sigmoid(self.decConv1(x))
